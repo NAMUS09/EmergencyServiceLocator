@@ -1,15 +1,23 @@
-import { useSelector } from "react-redux";
+import { setNearestService } from "@/store/gridSlice";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNearestService } from "../hooks/useNearestService";
 import { RootState } from "../store/store";
 
 const NearestServiceDisplay: React.FC = () => {
   const gridState = useSelector((state: RootState) => state.grid);
 
+  const dispatch = useDispatch();
+
   // Call the hook unconditionally
-  const { data, isLoading, error } = useNearestService(
+  const { data, isLoading } = useNearestService(
     gridState.selectedUser!,
     gridState.selectedService
   );
+
+  useEffect(() => {
+    if (!isLoading && data) dispatch(setNearestService(data.paths));
+  }, [isLoading, data, dispatch]);
 
   // Handle missing user or service selection
   if (!gridState.selectedUser || !gridState.selectedService) {
@@ -19,19 +27,12 @@ const NearestServiceDisplay: React.FC = () => {
   // Handle loading state
   if (isLoading) return <p>Loading...</p>;
 
-  // Handle error state
-  if (error) return <p>Error: {error.message}</p>;
-
   // Handle the case where no data is returned
   if (!data) {
     return <p>No nearest service found.</p>;
   }
 
-  return (
-    <p>
-      Nearest Service: {data.name} at distance {data.distance} meters
-    </p>
-  );
+  return <p>Nearest Service: at distance {data.distance} blocks</p>;
 };
 
 export default NearestServiceDisplay;

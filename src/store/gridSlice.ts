@@ -1,13 +1,32 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-type CellType = "X" | "Y" | "Z" | "U";
-type TServiceType = "X" | "Y" | "U";
+type CellName = "X" | "Y" | "Z" | "U";
+export type CellType = {
+  name: CellName;
+  id: string | null;
+  status: "open" | "closed" | null;
+  isPath?: boolean | null;
+  isNearest: boolean;
+};
+
+export interface Location {
+  row: number;
+  col: number;
+}
 
 export type ServiceType = "ambulance" | "hospital";
+
+export interface Service {
+  id: string;
+  type: ServiceType;
+  status: "open" | "closed";
+  location: Location;
+}
+
 interface GridState {
   grid: CellType[][];
   selectedService: ServiceType;
-
+  services: Service[];
   selectedUser: [number, number] | null;
 }
 
@@ -16,21 +35,9 @@ const gridRows = 13;
 const gridCols = 16;
 
 // Create an empty grid with "Z" for each cell
-const gridSpaces = Array(gridRows)
+const gridSpaces: CellType[][] = Array(gridRows)
   .fill(null)
-  .map(() => Array(gridCols).fill("Z"));
-
-// Define hospital location(s)
-const hospitalLocations: [number, number][] = [
-  [5, 5],
-  [12, 6],
-];
-
-// Define ambulance location(s)
-const ambulanceLocations: [number, number][] = [
-  [10, 10],
-  [3, 7],
-];
+  .map(() => Array(gridCols).fill({ name: "Z", id: null, status: null }));
 
 // Define user location(s)
 const userLocation: [number, number][] = [
@@ -43,19 +50,9 @@ const initializeGrid = () => {
   // Copy the empty grid to avoid mutating the original
   const grid = gridSpaces.map((row) => [...row]);
 
-  // Place hospitals in the grid
-  hospitalLocations.forEach(([row, col]) => {
-    grid[row][col] = "Y"; // "Y" represents a hospital
-  });
-
-  // Place ambulances in the grid
-  ambulanceLocations.forEach(([row, col]) => {
-    grid[row][col] = "X"; // "X" represents an ambulance
-  });
-
   // Place the user in the grid
   userLocation.forEach(([row, col]) => {
-    grid[row][col] = "U"; // "U" represents the user
+    grid[row][col] = { name: "U", id: null, status: null, isNearest: false };
   });
 
   return grid;
@@ -63,6 +60,7 @@ const initializeGrid = () => {
 
 const initialState: GridState = {
   grid: initializeGrid(),
+  services: [],
   selectedService: "ambulance",
   selectedUser: null,
 };
@@ -71,20 +69,25 @@ const gridSlice = createSlice({
   name: "grid",
   initialState,
   reducers: {
-    setCell: (
-      state,
-      action: PayloadAction<{ row: number; col: number; type: TServiceType }>
-    ) => {
-      const { row, col, type } = action.payload;
-      // Create a copy of the grid and update the specific cell
-      const updatedGrid = state.grid.map((r, rowIndex) =>
-        r.map((cell, colIndex) =>
-          rowIndex === row && colIndex === col ? type : cell
-        )
-      );
+    clearPaths: (state) => {
+      state.grid.forEach((row) => {
+        row.forEach((cell) => {
+          cell.isPath = false;
+          cell.isNearest = false;
+        });
+      });
+    },
+    setServices: (state, action: PayloadAction<Service[]>) => {
+      state.services = action.payload;
 
-      // Update the state with the new grid
-      state.grid = updatedGrid;
+      action.payload.forEach((service) => {
+        state.grid[service.location.row][service.location.col] = {
+          name: service.type === "ambulance" ? "X" : "Y",
+          id: service.id,
+          status: service.status,
+          isNearest: false,
+        };
+      });
     },
     setUser: (state, action: PayloadAction<{ row: number; col: number }>) => {
       const { row, col } = action.payload;
@@ -94,8 +97,30 @@ const gridSlice = createSlice({
     setService: (state, action: PayloadAction<ServiceType>) => {
       state.selectedService = action.payload;
     },
+    setNearestService: (
+      state,
+      action: PayloadAction<{ row: number; col: number }[]>
+    ) => {
+      const { payload } = action;
+      const lastIndex = payload.length - 1;
+
+      // Iterate through all elements except the last one
+      payload.slice(0, lastIndex).forEach(({ row, col }) => {
+        state.grid[row][col].isPath = true;
+      });
+
+      // Mark the last element
+      const { row, col } = payload[lastIndex];
+      state.grid[row][col].isNearest = true;
+    },
   },
 });
 
-export const { setCell, setService, setUser } = gridSlice.actions;
+export const {
+  clearPaths,
+  setService,
+  setUser,
+  setServices,
+  setNearestService,
+} = gridSlice.actions;
 export default gridSlice.reducer;

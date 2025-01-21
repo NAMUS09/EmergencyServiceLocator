@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ServiceType, setService } from "../store/gridSlice";
+import { clearPaths, ServiceType, setService } from "../store/gridSlice";
 import { RootState } from "../store/store";
 
 const ServiceSelector: React.FC = () => {
@@ -10,6 +10,7 @@ const ServiceSelector: React.FC = () => {
   ); // Access the selected service from the Redux store
 
   const handleServiceChange = (service: ServiceType) => {
+    dispatch(clearPaths());
     dispatch(setService(service));
   };
 
