@@ -1,50 +1,65 @@
-# React + TypeScript + Vite
+# Emergency Service Locator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+The **Emergency Service Locator** is a web application built using **Vite** that helps users locate the nearest emergency services. Users can select the type of service they need (Hospital or Ambulance) and view the closest available service in real-time.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- **Service Type Selection**: Choose between **Hospital** or **Ambulance** services.
+- **Real-time Results**: Displays the nearest available services based on the selected type.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Tech Stack
 
-- Configure the top-level `parserOptions` property like this:
+- **Frontend**: Vite, React, TypeScript
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Installation
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+- [Node.js](https://nodejs.org/)
+- [Vite](https://vitejs.dev/)
+
+### Clone the repository
+
+```bash
+git clone https://github.com/NAMUS09/EmergencyServiceLocator.git emergency-service-locator
+cd emergency-service-locator
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Install dependencies
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+npm install
 ```
+
+### Run the development server
+
+```bash
+npm run dev
+```
+
+Your application will be available at http://localhost:5173/.
+
+## Usage
+
+1. Open the application in your browser.
+2. Select the type of service you need: **Hospital** or **Ambulance**.
+3. Select the user location.
+4. View the nearest available services on the map and their details.
+5. Update service status like open or closed.
+
+## Contributing
+
+We welcome contributions to improve the Emergency Service Locator! If you would like to contribute, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-name`).
+3. Make your changes and ensure they are well-documented.
+4. Commit your changes (`git commit -am 'Add new feature'`).
+5. Push to the branch (`git push origin feature-name`).
+6. Open a pull request with a detailed description of your changes.
+
+If you find any issues or bugs, feel free to open an issue in the GitHub repository.
