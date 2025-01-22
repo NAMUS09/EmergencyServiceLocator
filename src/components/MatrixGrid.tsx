@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { MdLocationPin } from "react-icons/md";
 import { useQueryClient } from "react-query";
 import { useGetAllServices } from "../hooks/useGetAllService";
-import { CellType, clearPaths, setServices, setUser } from "../store/gridSlice";
+import { CellType, setServices, setUser } from "../store/gridSlice";
 import { RootState } from "../store/store";
 import { Button } from "./ui/button";
 import {
@@ -47,7 +47,7 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({
 
   useEffect(() => {
     setSelectedStatus(cell?.status ?? "open");
-  }, [cell?.status]);
+  }, [cell]);
 
   if (!cell) return null;
 
@@ -65,6 +65,7 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({
           setOpen(false);
           toast.success("Service status updated successfully");
           queryClient.invalidateQueries("allServices");
+          queryClient.invalidateQueries("nearestService");
         },
         onError: () => {
           toast.error("Failed to update service status");
@@ -110,7 +111,7 @@ const MatrixGrid: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [cell, setCell] = useState<CellType | null>(null);
   const { data, isLoading } = useGetAllServices();
-  const grid = useSelector((state: RootState) => state.grid.grid);
+  const gridState = useSelector((state: RootState) => state.grid);
 
   const dispatch = useDispatch();
 
@@ -118,13 +119,20 @@ const MatrixGrid: React.FC = () => {
     if (cell.name === "Z") return;
 
     if (cell.name === "X" || cell.name === "Y") {
-      setOpen(true);
       setCell(cell);
+      setOpen(true);
+      return;
+    }
+
+    if (
+      gridState.selectedUser &&
+      gridState.selectedUser[0] === row &&
+      gridState.selectedUser[1] === col
+    ) {
       return;
     }
 
     // Update the grid with the selected service type
-    dispatch(clearPaths());
     dispatch(setUser({ row, col }));
   };
 
@@ -137,8 +145,8 @@ const MatrixGrid: React.FC = () => {
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <div className="grid grid-cols-16 gap-2">
-      {grid.map((row, rowIndex) => (
+    <div className="grid grid-cols-16 gap-2 overflow-x-auto">
+      {gridState.grid.map((row, rowIndex) => (
         <div key={rowIndex} className="flex">
           {row.map((cell, colIndex) => (
             <div
